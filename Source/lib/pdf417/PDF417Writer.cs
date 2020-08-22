@@ -19,6 +19,7 @@ using System.Collections.Generic;
 
 using ZXing.Common;
 using ZXing.PDF417.Internal;
+using ZXing.QrCode.Internal;
 
 namespace ZXing.PDF417
 {
@@ -26,7 +27,7 @@ namespace ZXing.PDF417
     /// <author>Jacob Haynes</author>
     /// <author>qwandor@google.com (Andrew Walbran)</author>
     /// </summary>
-    public sealed class PDF417Writer : Writer
+    public sealed class PDF417Writer : IWriter
     {
         /// <summary>
         /// default white space (margin) around the code
@@ -52,11 +53,13 @@ namespace ZXing.PDF417
         /// <returns>
         /// The generated barcode as a Matrix of unsigned bytes (0 == black, 255 == white)
         /// </returns>
-        public BitMatrix encode(String contents,
+        public BitMatrix Encode(string contents,
                                 BarcodeFormat format,
                                 int width,
                                 int height,
-                                IDictionary<EncodeHintType, object> hints)
+                                Mode mode = null,
+                                int quietZone = 4,
+                                IDictionary<EncodeHintType, object> hints = null)
         {
             if (format != BarcodeFormat.PDF_417)
             {
@@ -142,16 +145,11 @@ namespace ZXing.PDF417
                 }
                 if (hints.ContainsKey(EncodeHintType.CHARACTER_SET))
                 {
-#if !SILVERLIGHT || WINDOWS_PHONE
-                    var encoding = (String)hints[EncodeHintType.CHARACTER_SET];
+                    var encoding = (string)hints[EncodeHintType.CHARACTER_SET];
                     if (encoding != null)
                     {
                         encoder.setEncoding(encoding);
                     }
-#else
-               // Silverlight supports only UTF-8 and UTF-16 out-of-the-box
-               encoder.setEncoding("UTF-8");
-#endif
                 }
                 if (hints.ContainsKey(EncodeHintType.DISABLE_ECI) && hints[EncodeHintType.DISABLE_ECI] != null)
                 {
@@ -165,32 +163,14 @@ namespace ZXing.PDF417
                 }
             }
 
-            return bitMatrixFromEncoder(encoder, contents, errorCorrectionLevel, width, height, margin, aspectRatio);
-        }
-
-        /// <summary>
-        /// Encode a barcode using the default settings.
-        /// </summary>
-        /// <param name="contents">The contents to encode in the barcode</param>
-        /// <param name="format">The barcode format to generate</param>
-        /// <param name="width">The preferred width in pixels</param>
-        /// <param name="height">The preferred height in pixels</param>
-        /// <returns>
-        /// The generated barcode as a Matrix of unsigned bytes (0 == black, 255 == white)
-        /// </returns>
-        public BitMatrix encode(String contents,
-                                BarcodeFormat format,
-                                int width,
-                                int height)
-        {
-            return encode(contents, format, width, height, null);
+            return BitMatrixFromEncoder(encoder, contents, errorCorrectionLevel, width, height, margin, aspectRatio);
         }
 
         /// <summary>
         /// Takes encoder, accounts for width/height, and retrieves bit matrix
         /// </summary>
-        private static BitMatrix bitMatrixFromEncoder(Internal.PDF417 encoder,
-                                                      String contents,
+        private static BitMatrix BitMatrixFromEncoder(Internal.PDF417 encoder,
+                                                      string contents,
                                                       int errorCorrectionLevel,
                                                       int width,
                                                       int height,
@@ -206,7 +186,7 @@ namespace ZXing.PDF417
             bool rotated = false;
             if ((height > width) != (originalScale[0].Length < originalScale.Length))
             {
-                originalScale = rotateArray(originalScale);
+                originalScale = RotateArray(originalScale);
                 rotated = true;
             }
 
@@ -229,11 +209,11 @@ namespace ZXing.PDF417
                    encoder.BarcodeMatrix.getScaledMatrix(scale, scale * aspectRatio);
                 if (rotated)
                 {
-                    scaledMatrix = rotateArray(scaledMatrix);
+                    scaledMatrix = RotateArray(scaledMatrix);
                 }
-                return bitMatrixFromBitArray(scaledMatrix, margin);
+                return BitMatrixFromBitArray(scaledMatrix, margin);
             }
-            return bitMatrixFromBitArray(originalScale, margin);
+            return BitMatrixFromBitArray(originalScale, margin);
         }
 
         /// <summary>
@@ -242,7 +222,7 @@ namespace ZXing.PDF417
         /// <param name="input">a byte array of information with 0 is black, and 1 is white</param>
         /// <param name="margin">border around the barcode</param>
         /// <returns>BitMatrix of the input</returns>
-        private static BitMatrix bitMatrixFromBitArray(sbyte[][] input, int margin)
+        private static BitMatrix BitMatrixFromBitArray(sbyte[][] input, int margin)
         {
             // Creates the bit matrix with extra space for whitespace
             var output = new BitMatrix(input[0].Length + 2 * margin, input.Length + 2 * margin);
@@ -266,7 +246,7 @@ namespace ZXing.PDF417
         /// <summary>
         /// Takes and rotates the it 90 degrees
         /// </summary>
-        private static sbyte[][] rotateArray(sbyte[][] bitarray)
+        private static sbyte[][] RotateArray(sbyte[][] bitarray)
         {
             sbyte[][] temp = new sbyte[bitarray[0].Length][];
             for (int idx = 0; idx < bitarray[0].Length; idx++)

@@ -38,7 +38,7 @@ namespace ZXing
         /// Gets or sets the writer which encodes the content to a BitMatrix.
         /// If no value is set the MultiFormatWriter is used.
         /// </summary>
-        Writer Encoder { get; set; }
+        IWriter Encoder { get; set; }
 
         /// <summary>
         /// Encodes the specified contents.

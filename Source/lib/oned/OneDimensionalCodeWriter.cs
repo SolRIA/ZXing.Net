@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 
 using ZXing.Common;
+using ZXing.QrCode.Internal;
 
 namespace ZXing.OneD
 {
@@ -25,7 +26,7 @@ namespace ZXing.OneD
     ///   <p>Encapsulates functionality and implementation that is common to one-dimensional barcodes.</p>
     ///   <author>dsbnatut@gmail.com (Kazuki Nishiura)</author>
     /// </summary>
-    public abstract class OneDimensionalCodeWriter : Writer
+    public abstract class OneDimensionalCodeWriter : IWriter
     {
         private static readonly System.Text.RegularExpressions.Regex NUMERIC = new System.Text.RegularExpressions.Regex("[0-9]+");
 
@@ -35,34 +36,21 @@ namespace ZXing.OneD
         protected abstract IList<BarcodeFormat> SupportedWriteFormats { get; }
 
         /// <summary>
-        /// Encode a barcode using the default settings.
-        /// </summary>
-        /// <param name="contents">The contents to encode in the barcode</param>
-        /// <param name="format">The barcode format to generate</param>
-        /// <param name="width">The preferred width in pixels</param>
-        /// <param name="height">The preferred height in pixels</param>
-        /// <returns>
-        /// The generated barcode as a Matrix of unsigned bytes (0 == black, 255 == white)
-        /// </returns>
-        public BitMatrix encode(String contents, BarcodeFormat format, int width, int height)
-        {
-            return encode(contents, format, width, height, null);
-        }
-
-        /// <summary>
         /// Encode the contents following specified format.
         /// {@code width} and {@code height} are required size. This method may return bigger size
         /// {@code BitMatrix} when specified size is too small. The user can set both {@code width} and
         /// {@code height} to zero to get minimum size barcode. If negative value is set to {@code width}
         /// or {@code height}, {@code IllegalArgumentException} is thrown.
         /// </summary>
-        public virtual BitMatrix encode(String contents,
+        public virtual BitMatrix Encode(string contents,
             BarcodeFormat format,
             int width,
             int height,
-            IDictionary<EncodeHintType, object> hints)
+            Mode mode = null,
+            int quietZone = 4,
+            IDictionary<EncodeHintType, object> hints = null)
         {
-            if (String.IsNullOrEmpty(contents))
+            if (string.IsNullOrEmpty(contents))
             {
                 throw new ArgumentException("Found empty contents");
             }
@@ -75,7 +63,7 @@ namespace ZXing.OneD
             var supportedFormats = SupportedWriteFormats;
             if (supportedFormats != null && !supportedFormats.Contains(format))
             {
-#if WindowsCE || WINDOWS_PHONE70 || NET20 || NET35 || UNITY || PORTABLE
+#if NET20 || NET35
                 var supportedFormatsArray = new string[supportedFormats.Count];
                 for (var i = 0; i < supportedFormats.Count; i++)
                     supportedFormatsArray[i] = supportedFormats[i].ToString();
@@ -95,14 +83,14 @@ namespace ZXing.OneD
                 }
             }
 
-            var code = encode(contents);
-            return renderResult(code, width, height, sidesMargin);
+            var code = Encode(contents);
+            return RenderResult(code, width, height, sidesMargin);
         }
 
         /// <summary>
         /// </summary>
         /// <returns>a byte array of horizontal pixels (0 = white, 1 = black)</returns>
-        private static BitMatrix renderResult(bool[] code, int width, int height, int sidesMargin)
+        private static BitMatrix RenderResult(bool[] code, int width, int height, int sidesMargin)
         {
             int inputWidth = code.Length;
             // Add quiet zone on both sides.
@@ -129,7 +117,7 @@ namespace ZXing.OneD
         /// </summary>
         /// <param name="contents">string to check for numeric characters</param>
         /// <exception cref="ArgumentException">if input contains characters other than digits 0-9.</exception>
-        protected static void checkNumeric(String contents)
+        protected static void CheckNumeric(string contents)
         {
             if (!NUMERIC.Match(contents).Success)
             {
@@ -145,7 +133,7 @@ namespace ZXing.OneD
         /// <param name="pattern">lengths of black/white runs to encode</param>
         /// <param name="startColor">starting color - false for white, true for black</param>
         /// <returns>the number of elements added to target.</returns>
-        protected static int appendPattern(bool[] target, int pos, int[] pattern, bool startColor)
+        protected static int AppendPattern(bool[] target, int pos, int[] pattern, bool startColor)
         {
             bool color = startColor;
             int numAdded = 0;
@@ -180,14 +168,14 @@ namespace ZXing.OneD
         /// </summary>
         /// <param name="contents">barcode contents to encode</param>
         /// <returns>a <c>bool[]</c> of horizontal pixels (false = white, true = black)</returns>
-        public abstract bool[] encode(String contents);
+        public abstract bool[] Encode(string contents);
 
         /// <summary>
         /// Calculates the checksum digit modulo10.
         /// </summary>
         /// <param name="contents">The contents.</param>
         /// <returns></returns>
-        public static String CalculateChecksumDigitModulo10(String contents)
+        public static string CalculateChecksumDigitModulo10(string contents)
         {
             var oddsum = 0;
             var evensum = 0;

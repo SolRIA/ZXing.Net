@@ -23,7 +23,6 @@ using System.Threading;
 using System.Windows.Forms;
 
 using WindowsFormsDemo.ImageFilters;
-
 using ZXing;
 using ZXing.Client.Result;
 using ZXing.Common;

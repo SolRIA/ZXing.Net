@@ -82,7 +82,7 @@ namespace ZXing.QrCode.Internal
         /// <returns>
         /// A <see cref="System.String"/> that represents this instance.
         /// </returns>
-        public override String ToString()
+        public override string ToString()
         {
             var result = new StringBuilder(200);
             result.Append("<<\n");
@@ -117,7 +117,7 @@ namespace ZXing.QrCode.Internal
         /// <returns>
         ///   <c>true</c> if [is valid mask pattern] [the specified mask pattern]; otherwise, <c>false</c>.
         /// </returns>
-        public static bool isValidMaskPattern(int maskPattern)
+        public static bool IsValidMaskPattern(int maskPattern)
         {
             return maskPattern >= 0 && maskPattern < NUM_MASK_PATTERNS;
         }

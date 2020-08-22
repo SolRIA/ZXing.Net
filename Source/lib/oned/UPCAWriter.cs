@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using ZXing.Common;
+using ZXing.QrCode.Internal;
 
 namespace ZXing.OneD
 {
@@ -24,24 +25,9 @@ namespace ZXing.OneD
     /// This object renders a UPC-A code as a <see cref="BitMatrix"/>.
     /// <author>qwandor@google.com (Andrew Walbran)</author>
     /// </summary>
-    public class UPCAWriter : Writer
+    public class UPCAWriter : IWriter
     {
         private readonly EAN13Writer subWriter = new EAN13Writer();
-
-        /// <summary>
-        /// Encode a barcode using the default settings.
-        /// </summary>
-        /// <param name="contents">The contents to encode in the barcode</param>
-        /// <param name="format">The barcode format to generate</param>
-        /// <param name="width">The preferred width in pixels</param>
-        /// <param name="height">The preferred height in pixels</param>
-        /// <returns>
-        /// The generated barcode as a Matrix of unsigned bytes (0 == black, 255 == white)
-        /// </returns>
-        public BitMatrix encode(String contents, BarcodeFormat format, int width, int height)
-        {
-            return encode(contents, format, width, height, null);
-        }
 
         /// <summary>
         /// </summary>
@@ -53,18 +39,20 @@ namespace ZXing.OneD
         /// <returns>
         /// The generated barcode as a Matrix of unsigned bytes (0 == black, 255 == white)
         /// </returns>
-        public BitMatrix encode(String contents,
+        public BitMatrix Encode(string contents,
                                 BarcodeFormat format,
                                 int width,
                                 int height,
-                                IDictionary<EncodeHintType, object> hints)
+                                Mode mode = null,
+                                int quietZone = 4,
+                                IDictionary<EncodeHintType, object> hints = null)
         {
             if (format != BarcodeFormat.UPC_A)
             {
                 throw new ArgumentException("Can only encode UPC-A, but got " + format);
             }
             // Transform a UPC-A code into the equivalent EAN-13 code and write it that way
-            return subWriter.encode('0' + contents, BarcodeFormat.EAN_13, width, height, hints);
+            return subWriter.Encode('0' + contents, BarcodeFormat.EAN_13, width, height, mode, quietZone, hints);
         }
     }
 }

@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using ZXing.QrCode.Internal;
 
 namespace ZXing.Common
 {
@@ -29,10 +30,11 @@ namespace ZXing.Common
         /// <summary>
         /// Gets the data container for all options
         /// </summary>
-#if !UNITY
         [Browsable(false)]
-#endif
         public IDictionary<EncodeHintType, object> Hints { get; private set; }
+
+        public Mode Mode { get; set; }
+        public int QuietZone { get; set; }
 
         /// <summary>
         /// Specifies the height of the barcode image

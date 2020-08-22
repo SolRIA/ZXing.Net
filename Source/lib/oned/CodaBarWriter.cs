@@ -45,7 +45,7 @@ namespace ZXing.OneD
         /// </summary>
         /// <param name="contents"></param>
         /// <returns></returns>
-        public override bool[] encode(String contents)
+        public override bool[] Encode(String contents)
         {
             if (contents.Length < 2)
             {

@@ -59,7 +59,7 @@ namespace ZXing.OneD
         /// </summary>
         /// <param name="contents"></param>
         /// <returns></returns>
-        override public bool[] encode(String contents)
+        override public bool[] Encode(String contents)
         {
             var length = contents.Length;
             for (var i = 0; i < length; i++)
@@ -71,14 +71,14 @@ namespace ZXing.OneD
 
             var codeWidth = 3 + length * 12 + 4;
             var result = new bool[codeWidth];
-            var pos = appendPattern(result, 0, startWidths, true);
+            var pos = AppendPattern(result, 0, startWidths, true);
             for (var i = 0; i < length; i++)
             {
                 var indexInString = MSIReader.ALPHABET_STRING.IndexOf(contents[i]);
                 var widths = numberWidths[indexInString];
-                pos += appendPattern(result, pos, widths, true);
+                pos += AppendPattern(result, pos, widths, true);
             }
-            appendPattern(result, pos, endWidths, true);
+            AppendPattern(result, pos, endWidths, true);
             return result;
         }
     }

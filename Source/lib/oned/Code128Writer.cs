@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using ZXing.Common;
+using ZXing.QrCode.Internal;
 
 namespace ZXing.OneD
 {
@@ -74,11 +75,13 @@ namespace ZXing.OneD
         /// {@code height} to zero to get minimum size barcode. If negative value is set to {@code width}
         /// or {@code height}, {@code IllegalArgumentException} is thrown.
         /// </summary>
-        public override BitMatrix encode(String contents,
+        public override BitMatrix Encode(string contents,
             BarcodeFormat format,
             int width,
             int height,
-            IDictionary<EncodeHintType, object> hints)
+            Mode mode = null,
+            int quietZone = 4,
+            IDictionary<EncodeHintType, object> hints = null)
         {
             forceCodesetB = (hints != null &&
                              hints.ContainsKey(EncodeHintType.CODE128_FORCE_CODESET_B) &&
@@ -95,12 +98,12 @@ namespace ZXing.OneD
                     contents = ESCAPE_FNC_1 + contents;
             }
 
-            return base.encode(contents, format, width, height, hints);
+            return base.Encode(contents, format, width, height, mode, quietZone, hints);
         }
         /// <summary>
         /// Encode the contents following specified format.
         /// </summary>
-        public override bool[] encode(String contents)
+        public override bool[] Encode(string contents)
         {
             int length = contents.Length;
             // Check content
@@ -131,7 +134,7 @@ namespace ZXing.OneD
             while (position < length)
             {
                 //Select code to use
-                int newCodeSet = chooseCode(contents, position, codeSet);
+                int newCodeSet = ChooseCode(contents, position, codeSet);
 
                 //Get the pattern index
                 int patternIndex;
@@ -242,14 +245,14 @@ namespace ZXing.OneD
             int pos = 0;
             foreach (int[] pattern in patterns)
             {
-                pos += appendPattern(result, pos, pattern, true);
+                pos += AppendPattern(result, pos, pattern, true);
             }
 
             return result;
         }
 
 
-        private static CType findCType(String value, int start)
+        private static CType FindCType(string value, int start)
         {
             int last = value.Length;
             if (start >= last)
@@ -277,9 +280,9 @@ namespace ZXing.OneD
             return CType.TWO_DIGITS;
         }
 
-        private int chooseCode(String value, int start, int oldCode)
+        private int ChooseCode(string value, int start, int oldCode)
         {
-            CType lookahead = findCType(value, start);
+            CType lookahead = FindCType(value, start);
             if (lookahead == CType.ONE_DIGIT)
             {
                 if (oldCode == CODE_CODE_A)
@@ -317,7 +320,7 @@ namespace ZXing.OneD
                     return CODE_CODE_B; // can continue in code B
                 }
                 // Seen two consecutive digits, see what follows
-                lookahead = findCType(value, start + 2);
+                lookahead = FindCType(value, start + 2);
                 if (lookahead == CType.UNCODABLE || lookahead == CType.ONE_DIGIT)
                 {
                     return CODE_CODE_B; // not worth switching now
@@ -325,7 +328,7 @@ namespace ZXing.OneD
                 if (lookahead == CType.FNC_1)
                 {
                     // two digits, then FNC_1...
-                    lookahead = findCType(value, start + 3);
+                    lookahead = FindCType(value, start + 3);
                     if (lookahead == CType.TWO_DIGITS)
                     {
                         // then two more digits, switch
@@ -339,7 +342,7 @@ namespace ZXing.OneD
                 // At this point, there are at least 4 consecutive digits.
                 // Look ahead to choose whether to switch now or on the next round.
                 int index = start + 4;
-                while ((lookahead = findCType(value, index)) == CType.TWO_DIGITS)
+                while ((lookahead = FindCType(value, index)) == CType.TWO_DIGITS)
                 {
                     index += 2;
                 }
@@ -354,7 +357,7 @@ namespace ZXing.OneD
             if (lookahead == CType.FNC_1)
             {
                 // ignore FNC_1
-                lookahead = findCType(value, start + 1);
+                lookahead = FindCType(value, start + 1);
             }
             if (lookahead == CType.TWO_DIGITS)
             {

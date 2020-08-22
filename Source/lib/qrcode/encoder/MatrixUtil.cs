@@ -297,7 +297,7 @@ namespace ZXing.QrCode.Internal
                         // Skip masking if mask_pattern is -1.
                         if (maskPattern != -1)
                         {
-                            if (MaskUtil.getDataMaskBit(maskPattern, xx, y))
+                            if (MaskUtil.GetDataMaskBit(maskPattern, xx, y))
                             {
                                 bit ^= 0x1;
                             }
@@ -395,7 +395,7 @@ namespace ZXing.QrCode.Internal
         /// <param name="bits">The bits.</param>
         public static void makeTypeInfoBits(ErrorCorrectionLevel ecLevel, int maskPattern, BitArray bits)
         {
-            if (!QRCode.isValidMaskPattern(maskPattern))
+            if (!QRCode.IsValidMaskPattern(maskPattern))
             {
                 throw new WriterException("Invalid mask pattern");
             }

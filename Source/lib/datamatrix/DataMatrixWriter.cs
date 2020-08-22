@@ -28,21 +28,8 @@ namespace ZXing.Datamatrix
     /// </summary>
     /// <author>dswitkin@google.com (Daniel Switkin)</author>
     /// <author>Guillaume Le Biller Added to zxing lib.</author>
-    public sealed class DataMatrixWriter : Writer
+    public sealed class DataMatrixWriter : IWriter
     {
-        /// <summary>
-        /// encodes the content to a BitMatrix
-        /// </summary>
-        /// <param name="contents"></param>
-        /// <param name="format"></param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
-        /// <returns></returns>
-        public BitMatrix encode(String contents, BarcodeFormat format, int width, int height)
-        {
-            return encode(contents, format, width, height, null);
-        }
-
         /// <summary>
         /// encodes the content to a BitMatrix
         /// </summary>
@@ -52,9 +39,9 @@ namespace ZXing.Datamatrix
         /// <param name="height"></param>
         /// <param name="hints"></param>
         /// <returns></returns>
-        public BitMatrix encode(String contents, BarcodeFormat format, int width, int height, IDictionary<EncodeHintType, object> hints)
+        public BitMatrix Encode(string contents, BarcodeFormat format, int width, int height, Mode mode = null, int quietZone = 4, IDictionary<EncodeHintType, object> hints = null)
         {
-            if (String.IsNullOrEmpty(contents))
+            if (string.IsNullOrEmpty(contents))
             {
                 throw new ArgumentException("Found empty contents", contents);
             }
@@ -79,9 +66,9 @@ namespace ZXing.Datamatrix
                 if (hints.ContainsKey(EncodeHintType.DATA_MATRIX_SHAPE))
                 {
                     var requestedShape = hints[EncodeHintType.DATA_MATRIX_SHAPE];
-                    if (requestedShape is SymbolShapeHint)
+                    if (requestedShape is SymbolShapeHint hint)
                     {
-                        shape = (SymbolShapeHint)requestedShape;
+                        shape = hint;
                     }
                     else
                     {
@@ -113,19 +100,19 @@ namespace ZXing.Datamatrix
 
 
             //1. step: Data encodation
-            String encoded = HighLevelEncoder.encodeHighLevel(contents, shape, minSize, maxSize, defaultEncodation);
+            string encoded = HighLevelEncoder.encodeHighLevel(contents, shape, minSize, maxSize, defaultEncodation);
 
             SymbolInfo symbolInfo = SymbolInfo.lookup(encoded.Length, shape, minSize, maxSize, true);
 
             //2. step: ECC generation
-            String codewords = ErrorCorrection.encodeECC200(encoded, symbolInfo);
+            string codewords = ErrorCorrection.encodeECC200(encoded, symbolInfo);
 
             //3. step: Module placement in Matrix
             var placement = new DefaultPlacement(codewords, symbolInfo.getSymbolDataWidth(), symbolInfo.getSymbolDataHeight());
             placement.place();
 
             //4. step: low-level encoding
-            return encodeLowLevel(placement, symbolInfo, width, height);
+            return EncodeLowLevel(placement, symbolInfo, width, height);
         }
 
         /// <summary>
@@ -136,7 +123,7 @@ namespace ZXing.Datamatrix
         /// <param name="width"></param>
         /// <param name="height"></param>
         /// <returns>The bit matrix generated.</returns>
-        private static BitMatrix encodeLowLevel(DefaultPlacement placement, SymbolInfo symbolInfo, int width, int height)
+        private static BitMatrix EncodeLowLevel(DefaultPlacement placement, SymbolInfo symbolInfo, int width, int height)
         {
             int symbolWidth = symbolInfo.getSymbolDataWidth();
             int symbolHeight = symbolInfo.getSymbolDataHeight();
@@ -191,7 +178,7 @@ namespace ZXing.Datamatrix
                 }
             }
 
-            return convertByteMatrixToBitMatrix(matrix, width, height);
+            return ConvertByteMatrixToBitMatrix(matrix, width, height);
         }
 
         /// <summary>
@@ -201,7 +188,7 @@ namespace ZXing.Datamatrix
         /// <param name="reqWidth">The requested width of the image (in pixels) with the Datamatrix code</param>
         /// <param name="reqHeight">The requested height of the image (in pixels) with the Datamatrix code</param>
         /// <returns>The output matrix.</returns>
-        private static BitMatrix convertByteMatrixToBitMatrix(ByteMatrix matrix, int reqWidth, int reqHeight)
+        private static BitMatrix ConvertByteMatrixToBitMatrix(ByteMatrix matrix, int reqWidth, int reqHeight)
         {
             var matrixWidth = matrix.Width;
             var matrixHeight = matrix.Height;

@@ -23,6 +23,7 @@ using ZXing.Datamatrix;
 using ZXing.OneD;
 using ZXing.PDF417;
 using ZXing.QrCode;
+using ZXing.QrCode.Internal;
 
 namespace ZXing
 {
@@ -34,13 +35,13 @@ namespace ZXing
     /// </author>
     /// <author>www.Redivivus.in (suraj.supekar@redivivus.in) - Ported from ZXING Java Source 
     /// </author>
-    public sealed class MultiFormatWriter : Writer
+    public sealed class MultiFormatWriter : IWriter
     {
-        private static readonly IDictionary<BarcodeFormat, Func<Writer>> formatMap;
+        private static readonly IDictionary<BarcodeFormat, Func<IWriter>> formatMap;
 
         static MultiFormatWriter()
         {
-            formatMap = new Dictionary<BarcodeFormat, Func<Writer>>
+            formatMap = new Dictionary<BarcodeFormat, Func<IWriter>>
                         {
                            {BarcodeFormat.EAN_8, () => new EAN8Writer()},
                            {BarcodeFormat.UPC_E, () => new UPCEWriter()},
@@ -75,27 +76,17 @@ namespace ZXing
         /// <param name="format"></param>
         /// <param name="width"></param>
         /// <param name="height"></param>
-        /// <returns></returns>
-        public BitMatrix encode(String contents, BarcodeFormat format, int width, int height)
-        {
-            return encode(contents, format, width, height, null);
-        }
-
-        /// <summary>
-        /// encode the given data
-        /// </summary>
-        /// <param name="contents"></param>
-        /// <param name="format"></param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
         /// <param name="hints"></param>
         /// <returns></returns>
-        public BitMatrix encode(String contents, BarcodeFormat format, int width, int height, IDictionary<EncodeHintType, object> hints)
+        public BitMatrix Encode(string contents, BarcodeFormat format, int width, int height,
+            Mode mode = null,
+            int quietZone = 4,
+            IDictionary<EncodeHintType, object> hints = null)
         {
             if (!formatMap.ContainsKey(format))
                 throw new ArgumentException("No encoder available for format " + format);
 
-            return formatMap[format]().encode(contents, format, width, height, hints);
+            return formatMap[format]().Encode(contents, format, width, height, mode, quietZone, hints);
         }
     }
 }

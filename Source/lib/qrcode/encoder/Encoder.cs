@@ -40,33 +40,16 @@ namespace ZXing.QrCode.Internal
          25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, -1, -1, -1, -1, -1,  // 0x50-0x5f
       };
 
-        internal static String DEFAULT_BYTE_MODE_ENCODING = "ISO-8859-1";
+        internal static string DEFAULT_BYTE_MODE_ENCODING = "ISO-8859-1";
 
         // The mask penalty calculation is complicated.  See Table 21 of JISX0510:2004 (p.45) for details.
         // Basically it applies four rules and summate all penalties.
-        private static int calculateMaskPenalty(ByteMatrix matrix)
+        private static int CalculateMaskPenalty(ByteMatrix matrix)
         {
-            return MaskUtil.applyMaskPenaltyRule1(matrix)
-                    + MaskUtil.applyMaskPenaltyRule2(matrix)
-                    + MaskUtil.applyMaskPenaltyRule3(matrix)
-                    + MaskUtil.applyMaskPenaltyRule4(matrix);
-        }
-
-        /// <summary>
-        /// Encode "bytes" with the error correction level "ecLevel". The encoding mode will be chosen
-        /// internally by chooseMode(). On success, store the result in "qrCode".
-        /// We recommend you to use QRCode.EC_LEVEL_L (the lowest level) for
-        /// "getECLevel" since our primary use is to show QR code on desktop screens. We don't need very
-        /// strong error correction for this purpose.
-        /// Note that there is no way to encode bytes in MODE_KANJI. We might want to add EncodeWithMode()
-        /// with which clients can specify the encoding mode. For now, we don't need the functionality.
-        /// </summary>
-        /// <param name="content">text to encode</param>
-        /// <param name="ecLevel">error correction level to use</param>
-        /// <returns><see cref="QRCode"/> representing the encoded QR code</returns>
-        public static QRCode encode(String content, ErrorCorrectionLevel ecLevel)
-        {
-            return encode(content, ecLevel, null);
+            return MaskUtil.ApplyMaskPenaltyRule1(matrix)
+                    + MaskUtil.ApplyMaskPenaltyRule2(matrix)
+                    + MaskUtil.ApplyMaskPenaltyRule3(matrix)
+                    + MaskUtil.ApplyMaskPenaltyRule4(matrix);
         }
 
         /// <summary>
@@ -76,31 +59,21 @@ namespace ZXing.QrCode.Internal
         /// <param name="ecLevel">The ec level.</param>
         /// <param name="hints">The hints.</param>
         /// <returns></returns>
-        public static QRCode encode(String content,
-                                  ErrorCorrectionLevel ecLevel,
-                                  IDictionary<EncodeHintType, object> hints)
+        public static QRCode Encode(string content, ErrorCorrectionLevel ecLevel, Mode mode = null, IDictionary<EncodeHintType, object> hints = null)
         {
             // Determine what character encoding has been specified by the caller, if any
             bool hasEncodingHint = hints != null && hints.ContainsKey(EncodeHintType.CHARACTER_SET);
 
-#if !SILVERLIGHT || WINDOWS_PHONE
-            var encoding = hints == null || !hints.ContainsKey(EncodeHintType.CHARACTER_SET) ? null : (String)hints[EncodeHintType.CHARACTER_SET];
+            var encoding = hints == null || !hints.ContainsKey(EncodeHintType.CHARACTER_SET) ? null : (string)hints[EncodeHintType.CHARACTER_SET];
             if (encoding == null)
-            {
                 encoding = DEFAULT_BYTE_MODE_ENCODING;
-            }
+
             var generateECI = hasEncodingHint || !DEFAULT_BYTE_MODE_ENCODING.Equals(encoding);
-#else
-         // Silverlight supports only UTF-8 and UTF-16 out-of-the-box
-         const string encoding = "UTF-8";
-         // caller of the method can only control if the ECI segment should be written
-         // character set is fixed to UTF-8; but some scanners doesn't like the ECI segment
-         var generateECI = hasEncodingHint;
-#endif
 
             // Pick an encoding mode appropriate for the content. Note that this will not attempt to use
             // multiple modes / segments even if that were more efficient. Twould be nice.
-            var mode = chooseMode(content, encoding);
+            if (mode == null)
+                mode = ChooseMode(content, encoding);
 
             // This will store the header information, like mode and
             // length, as well as "header" segments like an ECI segment.
@@ -125,11 +98,11 @@ namespace ZXing.QrCode.Internal
             if (hasGS1FormatHint && hints[EncodeHintType.GS1_FORMAT] != null && Convert.ToBoolean(hints[EncodeHintType.GS1_FORMAT].ToString()))
             {
                 // GS1 formatted codes are prefixed with a FNC1 in first position mode header
-                appendModeInfo(Mode.FNC1_FIRST_POSITION, headerBits);
+                AppendModeInfo(Mode.FNC1_FIRST_POSITION, headerBits);
             }
 
             // (With ECI in place,) Write the mode marker
-            appendModeInfo(mode, headerBits);
+            AppendModeInfo(mode, headerBits);
 
             // Collect data within the main segment, separately, to count its size if needed. Don't add it to
             // main payload yet.
@@ -139,9 +112,9 @@ namespace ZXing.QrCode.Internal
             Version version;
             if (hints != null && hints.ContainsKey(EncodeHintType.QR_VERSION))
             {
-                int versionNumber = Int32.Parse(hints[EncodeHintType.QR_VERSION].ToString());
+                int versionNumber = int.Parse(hints[EncodeHintType.QR_VERSION].ToString());
                 version = Version.getVersionForNumber(versionNumber);
-                int bitsNeeded = calculateBitsNeeded(mode, headerBits, dataBits, version);
+                int bitsNeeded = CalculateBitsNeeded(mode, headerBits, dataBits, version);
                 if (!willFit(bitsNeeded, version, ecLevel))
                 {
                     throw new WriterException("Data too big for requested version");
@@ -149,14 +122,14 @@ namespace ZXing.QrCode.Internal
             }
             else
             {
-                version = recommendVersion(ecLevel, mode, headerBits, dataBits);
+                version = RecommendVersion(ecLevel, mode, headerBits, dataBits);
             }
 
             var headerAndDataBits = new BitArray();
             headerAndDataBits.appendBitArray(headerBits);
             // Find "length" of main segment and write it
             var numLetters = mode == Mode.BYTE ? dataBits.SizeInBytes : content.Length;
-            appendLengthInfo(numLetters, version, mode, headerAndDataBits);
+            AppendLengthInfo(numLetters, version, mode, headerAndDataBits);
             // Put data together into the overall payload
             headerAndDataBits.appendBitArray(dataBits);
 
@@ -187,8 +160,8 @@ namespace ZXing.QrCode.Internal
             var maskPattern = -1;
             if (hints != null && hints.ContainsKey(EncodeHintType.QR_MASK_PATTERN))
             {
-                var hintMaskPattern = Int32.Parse(hints[EncodeHintType.QR_MASK_PATTERN].ToString());
-                maskPattern = QRCode.isValidMaskPattern(hintMaskPattern) ? hintMaskPattern : -1;
+                var hintMaskPattern = int.Parse(hints[EncodeHintType.QR_MASK_PATTERN].ToString());
+                maskPattern = QRCode.IsValidMaskPattern(hintMaskPattern) ? hintMaskPattern : -1;
             }
 
             if (maskPattern == -1)
@@ -208,22 +181,22 @@ namespace ZXing.QrCode.Internal
         /// Decides the smallest version of QR code that will contain all of the provided data.
         /// </summary>
         /// <exception cref="WriterException">if the data cannot fit in any version</exception>
-        private static Version recommendVersion(ErrorCorrectionLevel ecLevel, Mode mode, BitArray headerBits, BitArray dataBits)
+        private static Version RecommendVersion(ErrorCorrectionLevel ecLevel, Mode mode, BitArray headerBits, BitArray dataBits)
         {
             // Hard part: need to know version to know how many bits length takes. But need to know how many
             // bits it takes to know version. First we take a guess at version by assuming version will be
             // the minimum, 1:
-            var provisionalBitsNeeded = calculateBitsNeeded(mode, headerBits, dataBits, Version.getVersionForNumber(1));
+            var provisionalBitsNeeded = CalculateBitsNeeded(mode, headerBits, dataBits, Version.getVersionForNumber(1));
             var provisionalVersion = chooseVersion(provisionalBitsNeeded, ecLevel);
 
             // Use that guess to calculate the right version. I am still not sure this works in 100% of cases.
-            var bitsNeeded = calculateBitsNeeded(mode, headerBits, dataBits, provisionalVersion);
+            var bitsNeeded = CalculateBitsNeeded(mode, headerBits, dataBits, provisionalVersion);
             return chooseVersion(bitsNeeded, ecLevel);
         }
 
-        private static int calculateBitsNeeded(Mode mode, BitArray headerBits, BitArray dataBits, Version version)
+        private static int CalculateBitsNeeded(Mode mode, BitArray headerBits, BitArray dataBits, Version version)
         {
-            return headerBits.Size + mode.getCharacterCountBits(version) + dataBits.Size;
+            return headerBits.Size + mode.GetCharacterCountBits(version) + dataBits.Size;
         }
 
         /// <summary>
@@ -232,7 +205,7 @@ namespace ZXing.QrCode.Internal
         /// <param name="code">The code.</param>
         /// <returns>the code point of the table used in alphanumeric mode or
         /// -1 if there is no corresponding code in the table.</returns>
-        internal static int getAlphanumericCode(int code)
+        internal static int GetAlphanumericCode(int code)
         {
             if (code < ALPHANUMERIC_TABLE.Length)
             {
@@ -242,23 +215,13 @@ namespace ZXing.QrCode.Internal
         }
 
         /// <summary>
-        /// Chooses the mode.
-        /// </summary>
-        /// <param name="content">The content.</param>
-        /// <returns></returns>
-        public static Mode chooseMode(String content)
-        {
-            return chooseMode(content, null);
-        }
-
-        /// <summary>
         /// Choose the best mode by examining the content. Note that 'encoding' is used as a hint;
         /// if it is Shift_JIS, and the input is only double-byte Kanji, then we return {@link Mode#KANJI}.
         /// </summary>
         /// <param name="content">The content.</param>
         /// <param name="encoding">The encoding.</param>
         /// <returns></returns>
-        private static Mode chooseMode(String content, String encoding)
+        private static Mode ChooseMode(string content, string encoding)
         {
             if ("Shift_JIS".Equals(encoding) && isOnlyDoubleByteKanji(content))
             {
@@ -274,7 +237,7 @@ namespace ZXing.QrCode.Internal
                 {
                     hasNumeric = true;
                 }
-                else if (getAlphanumericCode(c) != -1)
+                else if (GetAlphanumericCode(c) != -1)
                 {
                     hasAlphanumeric = true;
                 }
@@ -338,7 +301,7 @@ namespace ZXing.QrCode.Internal
             {
 
                 MatrixUtil.buildMatrix(bits, ecLevel, version, maskPattern, matrix);
-                int penalty = calculateMaskPenalty(matrix);
+                int penalty = CalculateMaskPenalty(matrix);
                 if (penalty < minPenalty)
                 {
 
@@ -608,7 +571,7 @@ namespace ZXing.QrCode.Internal
         /// </summary>
         /// <param name="mode">The mode.</param>
         /// <param name="bits">The bits.</param>
-        internal static void appendModeInfo(Mode mode, BitArray bits)
+        internal static void AppendModeInfo(Mode mode, BitArray bits)
         {
             bits.appendBits(mode.Bits, 4);
         }
@@ -621,9 +584,9 @@ namespace ZXing.QrCode.Internal
         /// <param name="version">The version.</param>
         /// <param name="mode">The mode.</param>
         /// <param name="bits">The bits.</param>
-        internal static void appendLengthInfo(int numLetters, Version version, Mode mode, BitArray bits)
+        internal static void AppendLengthInfo(int numLetters, Version version, Mode mode, BitArray bits)
         {
-            int numBits = mode.getCharacterCountBits(version);
+            int numBits = mode.GetCharacterCountBits(version);
             if (numLetters >= (1 << numBits))
             {
                 throw new WriterException(numLetters + " is bigger than " + ((1 << numBits) - 1));
@@ -697,14 +660,14 @@ namespace ZXing.QrCode.Internal
             int i = 0;
             while (i < length)
             {
-                int code1 = getAlphanumericCode(content[i]);
+                int code1 = GetAlphanumericCode(content[i]);
                 if (code1 == -1)
                 {
                     throw new WriterException();
                 }
                 if (i + 1 < length)
                 {
-                    int code2 = getAlphanumericCode(content[i + 1]);
+                    int code2 = GetAlphanumericCode(content[i + 1]);
                     if (code2 == -1)
                     {
                         throw new WriterException();

@@ -65,7 +65,7 @@ namespace ZXing.OneD
         /// </summary>
         /// <param name="contents"></param>
         /// <returns></returns>
-        public override bool[] encode(String contents)
+        public override bool[] Encode(String contents)
         {
             int length = contents.Length;
             if (length % 2 != 0)
@@ -83,10 +83,10 @@ namespace ZXing.OneD
                     throw new ArgumentException("Requested contents should only contain digits, but got '" + contents[i] + "'");
             }
 
-            checkNumeric(contents);
+            CheckNumeric(contents);
 
             var result = new bool[9 + 9 * length];
-            int pos = appendPattern(result, 0, START_PATTERN, true);
+            int pos = AppendPattern(result, 0, START_PATTERN, true);
             for (int i = 0; i < length; i += 2)
             {
                 int one = Convert.ToInt32(contents[i].ToString(), 10);
@@ -97,9 +97,9 @@ namespace ZXing.OneD
                     encoding[j << 1] = PATTERNS[one][j];
                     encoding[(j << 1) + 1] = PATTERNS[two][j];
                 }
-                pos += appendPattern(result, pos, encoding, true);
+                pos += AppendPattern(result, pos, encoding, true);
             }
-            appendPattern(result, pos, END_PATTERN, true);
+            AppendPattern(result, pos, END_PATTERN, true);
 
             return result;
         }

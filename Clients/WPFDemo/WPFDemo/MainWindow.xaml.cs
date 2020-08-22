@@ -49,7 +49,7 @@ namespace WPFDemo
             cmbRendererType.SelectedItem = "WriteableBitmap";
         }
 
-        private void btnSelectFile_Click(object sender, RoutedEventArgs e)
+        private void BtnSelectFile_Click(object sender, RoutedEventArgs e)
         {
             var dlg = new OpenFileDialog
             {
@@ -62,7 +62,7 @@ namespace WPFDemo
             }
         }
 
-        private void btnDecode_Click(object sender, RoutedEventArgs e)
+        private void BtnDecode_Click(object sender, RoutedEventArgs e)
         {
             var start = DateTime.Now;
             var result = reader.Decode((BitmapSource)imageBarcode.Source);
@@ -79,7 +79,7 @@ namespace WPFDemo
             }
         }
 
-        private void txtBarcodeImageFile_TextChanged(object sender, TextChangedEventArgs e)
+        private void TxtBarcodeImageFile_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (File.Exists(txtBarcodeImageFile.Text))
             {
@@ -87,7 +87,7 @@ namespace WPFDemo
             }
         }
 
-        private void btnEncode_Click(object sender, RoutedEventArgs e)
+        private void BtnEncode_Click(object sender, RoutedEventArgs e)
         {
             imageBarcodeEncoder.Visibility = Visibility.Hidden;
             imageBarcodeEncoderGeometry.Visibility = Visibility.Hidden;
@@ -99,11 +99,14 @@ namespace WPFDemo
                         var writer = new BarcodeWriter
                         {
                             Format = (BarcodeFormat)cmbEncoderType.SelectedItem,
-                            Options = new ZXing.Common.EncodingOptions
+                            Options = new ZXing.QrCode.QrCodeEncodingOptions
                             {
                                 Height = (int)((FrameworkElement)imageBarcodeEncoder.Parent).ActualHeight,
                                 Width = (int)((FrameworkElement)imageBarcodeEncoder.Parent).ActualWidth,
-                                Margin = 0
+                                Margin = 2,
+                                QuietZone = 6,
+                                Mode = ZXing.QrCode.Internal.Mode.BYTE,
+                                ErrorCorrection = ZXing.QrCode.Internal.ErrorCorrectionLevel.M
                             }
                         };
                         var image = writer.Write(txtBarcodeContentEncode.Text);
@@ -116,11 +119,14 @@ namespace WPFDemo
                         var writer = new BarcodeWriterGeometry
                         {
                             Format = (BarcodeFormat)cmbEncoderType.SelectedItem,
-                            Options = new ZXing.Common.EncodingOptions
+                            Options = new ZXing.QrCode.QrCodeEncodingOptions
                             {
                                 Height = (int)((FrameworkElement)imageBarcodeEncoder.Parent).ActualHeight,
                                 Width = (int)((FrameworkElement)imageBarcodeEncoder.Parent).ActualWidth,
-                                Margin = 0
+                                Margin = 2,
+                                QuietZone = 6,
+                                Mode = ZXing.QrCode.Internal.Mode.BYTE,
+                                ErrorCorrection = ZXing.QrCode.Internal.ErrorCorrectionLevel.M
                             }
                         };
                         var image = writer.Write(txtBarcodeContentEncode.Text);

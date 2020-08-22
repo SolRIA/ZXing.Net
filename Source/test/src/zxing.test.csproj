@@ -247,16 +247,6 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\lib\zxing.net4.0.csproj">
-      <Project>{6431CF13-7A7B-4602-B96A-47CDA6F0B008}</Project>
-      <Name>zxing.net4.0</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\lib\zxing.net4.0.presentation.csproj">
-      <Project>{EA513204-63F3-4C50-992D-08FF430B6F70}</Project>
-      <Name>zxing.net4.0.presentation</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Folder Include="datamatrix\detector\" />
   </ItemGroup>
   <ItemGroup>

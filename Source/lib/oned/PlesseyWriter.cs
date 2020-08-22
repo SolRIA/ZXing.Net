@@ -70,7 +70,7 @@ namespace ZXing.OneD
         /// </summary>
         /// <param name="contents"></param>
         /// <returns></returns>
-        override public bool[] encode(String contents)
+        override public bool[] Encode(String contents)
         {
             var length = contents.Length;
             for (var i = 0; i < length; i++)
@@ -87,13 +87,13 @@ namespace ZXing.OneD
             var crcBufferPos = 0;
             var pos = 100;
             // start pattern
-            pos += appendPattern(result, pos, startWidths, true);
+            pos += AppendPattern(result, pos, startWidths, true);
             // data
             for (var i = 0; i < length; i++)
             {
                 var indexInString = ALPHABET_STRING.IndexOf(contents[i]);
                 var widths = numberWidths[indexInString];
-                pos += appendPattern(result, pos, widths, true);
+                pos += AppendPattern(result, pos, widths, true);
                 // remember the position number for crc calculation
                 crcBuffer[crcBufferPos++] = (byte)(indexInString & 1);
                 crcBuffer[crcBufferPos++] = (byte)((indexInString >> 1) & 1);
@@ -117,17 +117,17 @@ namespace ZXing.OneD
                 switch (crcBuffer[length * 4 + i])
                 {
                     case 0:
-                        pos += appendPattern(result, pos, crc0Widths, true);
+                        pos += AppendPattern(result, pos, crc0Widths, true);
                         break;
                     case 1:
-                        pos += appendPattern(result, pos, crc1Widths, true);
+                        pos += AppendPattern(result, pos, crc1Widths, true);
                         break;
                 }
             }
             // termination bar
-            pos += appendPattern(result, pos, terminationWidths, true);
+            pos += AppendPattern(result, pos, terminationWidths, true);
             // end pattern
-            appendPattern(result, pos, endWidths, false);
+            AppendPattern(result, pos, endWidths, false);
             return result;
         }
     }

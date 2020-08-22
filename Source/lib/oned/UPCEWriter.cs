@@ -47,7 +47,7 @@ namespace ZXing.OneD
         /// </summary>
         /// <param name="contents"></param>
         /// <returns></returns>
-        public override bool[] encode(String contents)
+        public override bool[] Encode(String contents)
         {
             int length = contents.Length;
             switch (length)
@@ -78,7 +78,7 @@ namespace ZXing.OneD
                     throw new ArgumentException("Requested contents should be 7 or 8 digits long, but got " + length);
             }
 
-            checkNumeric(contents);
+            CheckNumeric(contents);
 
             int firstDigit = int.Parse(contents.Substring(0, 1));
             if (firstDigit != 0 && firstDigit != 1)
@@ -90,7 +90,7 @@ namespace ZXing.OneD
             var parities = UPCEReader.NUMSYS_AND_CHECK_DIGIT_PATTERNS[firstDigit][checkDigit];
             var result = new bool[CODE_WIDTH];
 
-            var pos = appendPattern(result, 0, UPCEANReader.START_END_PATTERN, true);
+            var pos = AppendPattern(result, 0, UPCEANReader.START_END_PATTERN, true);
 
             for (var i = 1; i <= 6; i++)
             {
@@ -99,10 +99,10 @@ namespace ZXing.OneD
                 {
                     digit += 10;
                 }
-                pos += appendPattern(result, pos, UPCEANReader.L_AND_G_PATTERNS[digit], false);
+                pos += AppendPattern(result, pos, UPCEANReader.L_AND_G_PATTERNS[digit], false);
             }
 
-            appendPattern(result, pos, UPCEANReader.END_PATTERN, false);
+            AppendPattern(result, pos, UPCEANReader.END_PATTERN, false);
 
             return result;
         }

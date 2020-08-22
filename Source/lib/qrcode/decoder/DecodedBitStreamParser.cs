@@ -64,7 +64,7 @@ namespace ZXing.QrCode.Internal
                     {
                         try
                         {
-                            mode = Mode.forBits(bits.readBits(4)); // mode is encoded by 4 bits
+                            mode = Mode.ForBits(bits.readBits(4)); // mode is encoded by 4 bits
                         }
                         catch (ArgumentException)
                         {
@@ -103,7 +103,7 @@ namespace ZXing.QrCode.Internal
                             // First handle Hanzi mode which does not start with character count
                             //chinese mode contains a sub set indicator right after mode indicator
                             int subset = bits.readBits(4);
-                            int countHanzi = bits.readBits(mode.getCharacterCountBits(version));
+                            int countHanzi = bits.readBits(mode.GetCharacterCountBits(version));
                             if (subset == GB2312_SUBSET)
                             {
                                 if (!decodeHanziSegment(bits, result, countHanzi))
@@ -113,7 +113,7 @@ namespace ZXing.QrCode.Internal
                         default:
                             // "Normal" QR code modes:
                             // How many characters will follow, encoded in this mode?
-                            int count = bits.readBits(mode.getCharacterCountBits(version));
+                            int count = bits.readBits(mode.GetCharacterCountBits(version));
                             switch (mode.Name)
                             {
                                 case Mode.Names.NUMERIC:

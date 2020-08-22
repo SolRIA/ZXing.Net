@@ -27,25 +27,8 @@ namespace ZXing.QrCode
     ///
     /// <author>dswitkin@google.com (Daniel Switkin)</author>
     /// </summary>
-    public sealed class QRCodeWriter : Writer
+    public sealed class QRCodeWriter : IWriter
     {
-        private const int QUIET_ZONE_SIZE = 4;
-
-        /// <summary>
-        /// Encode a barcode using the default settings.
-        /// </summary>
-        /// <param name="contents">The contents to encode in the barcode</param>
-        /// <param name="format">The barcode format to generate</param>
-        /// <param name="width">The preferred width in pixels</param>
-        /// <param name="height">The preferred height in pixels</param>
-        /// <returns>
-        /// The generated barcode as a Matrix of unsigned bytes (0 == black, 255 == white)
-        /// </returns>
-        public BitMatrix encode(String contents, BarcodeFormat format, int width, int height)
-        {
-            return encode(contents, format, width, height, null);
-        }
-
         /// <summary>
         /// </summary>
         /// <param name="contents">The contents to encode in the barcode</param>
@@ -56,13 +39,15 @@ namespace ZXing.QrCode
         /// <returns>
         /// The generated barcode as a Matrix of unsigned bytes (0 == black, 255 == white)
         /// </returns>
-        public BitMatrix encode(String contents,
+        public BitMatrix Encode(string contents,
                                 BarcodeFormat format,
                                 int width,
                                 int height,
-                                IDictionary<EncodeHintType, object> hints)
+                                Mode mode = null,
+                                int quietZone = 4,
+                                IDictionary<EncodeHintType, object> hints = null)
         {
-            if (String.IsNullOrEmpty(contents))
+            if (string.IsNullOrEmpty(contents))
             {
                 throw new ArgumentException("Found empty contents");
             }
@@ -78,7 +63,7 @@ namespace ZXing.QrCode
             }
 
             var errorCorrectionLevel = ErrorCorrectionLevel.L;
-            int quietZone = QUIET_ZONE_SIZE;
+
             if (hints != null)
             {
                 if (hints.ContainsKey(EncodeHintType.ERROR_CORRECTION))
@@ -110,23 +95,15 @@ namespace ZXing.QrCode
                         }
                     }
                 }
-                if (hints.ContainsKey(EncodeHintType.MARGIN))
-                {
-                    var quietZoneInt = hints[EncodeHintType.MARGIN];
-                    if (quietZoneInt != null)
-                    {
-                        quietZone = Convert.ToInt32(quietZoneInt.ToString());
-                    }
-                }
             }
 
-            var code = Encoder.encode(contents, errorCorrectionLevel, hints);
-            return renderResult(code, width, height, quietZone);
+            var code = Encoder.Encode(contents, errorCorrectionLevel, mode, hints);
+            return RenderResult(code, width, height, quietZone);
         }
 
         // Note that the input matrix uses 0 == white, 1 == black, while the output matrix uses
         // 0 == black, 255 == white (i.e. an 8 bit greyscale bitmap).
-        private static BitMatrix renderResult(QRCode code, int width, int height, int quietZone)
+        private static BitMatrix RenderResult(QRCode code, int width, int height, int quietZone)
         {
             var input = code.Matrix;
             if (input == null)

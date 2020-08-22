@@ -44,7 +44,7 @@ namespace ZXing.OneD
         /// </summary>
         /// <param name="contents"></param>
         /// <returns></returns>
-        public override bool[] encode(String contents)
+        public override bool[] Encode(String contents)
         {
             int length = contents.Length;
             if (length > 80)
@@ -75,19 +75,19 @@ namespace ZXing.OneD
             int codeWidth = 24 + 1 + (13 * length);
             var result = new bool[codeWidth];
             toIntArray(Code39Reader.ASTERISK_ENCODING, widths);
-            int pos = appendPattern(result, 0, widths, true);
+            int pos = AppendPattern(result, 0, widths, true);
             int[] narrowWhite = {1};
-            pos += appendPattern(result, pos, narrowWhite, false);
+            pos += AppendPattern(result, pos, narrowWhite, false);
             //append next character to byte matrix
             for (int i = 0; i < length; i++)
             {
                 int indexInString = Code39Reader.ALPHABET_STRING.IndexOf(contents[i]);
                 toIntArray(Code39Reader.CHARACTER_ENCODINGS[indexInString], widths);
-                pos += appendPattern(result, pos, widths, true);
-                pos += appendPattern(result, pos, narrowWhite, false);
+                pos += AppendPattern(result, pos, widths, true);
+                pos += AppendPattern(result, pos, narrowWhite, false);
             }
             toIntArray(Code39Reader.ASTERISK_ENCODING, widths);
-            appendPattern(result, pos, widths, true);
+            AppendPattern(result, pos, widths, true);
             return result;
         }
 

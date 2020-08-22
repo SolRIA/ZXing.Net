@@ -85,7 +85,7 @@ namespace ZXing.QrCode.Internal
         public static readonly Mode TERMINATOR = new Mode(new int[] { 0, 0, 0 }, 0x00, Names.TERMINATOR); // Not really a mode...
                                                                                                           /// <summary>
                                                                                                           /// 
-                                                                                                          /// </summary>
+                                                                                                         /// </summary>
         public static readonly Mode NUMERIC = new Mode(new int[] { 10, 12, 14 }, 0x01, Names.NUMERIC);
         /// <summary>
         /// 
@@ -135,7 +135,7 @@ namespace ZXing.QrCode.Internal
         ///   <see cref="Mode"/> encoded by these bits
         /// </returns>
         /// <exception cref="ArgumentException">if bits do not correspond to a known mode</exception>
-        public static Mode forBits(int bits)
+        public static Mode ForBits(int bits)
         {
             switch (bits)
             {
@@ -170,7 +170,7 @@ namespace ZXing.QrCode.Internal
         /// <returns> number of bits used, in this QR Code symbol {@link Version}, to encode the
         /// count of characters that will follow encoded in this {@link Mode}
         /// </returns>
-        public int getCharacterCountBits(Version version)
+        public int GetCharacterCountBits(Version version)
         {
             if (characterCountBitsForVersions == null)
             {
@@ -204,7 +204,7 @@ namespace ZXing.QrCode.Internal
         /// <returns>
         /// A <see cref="System.String"/> that represents this instance.
         /// </returns>
-        public override String ToString()
+        public override string ToString()
         {
             return Name.ToString();
         }

@@ -50,7 +50,7 @@ namespace ZXing
         /// Gets or sets the writer which encodes the content to a BitMatrix.
         /// If no value is set the MultiFormatWriter is used.
         /// </summary>
-        public Writer Encoder { get; set; }
+        public IWriter Encoder { get; set; }
 
         /// <summary>
         /// 
@@ -63,7 +63,7 @@ namespace ZXing
         /// 
         /// </summary>
         /// <param name="encoder"></param>
-        public BarcodeWriterGeneric(Writer encoder)
+        public BarcodeWriterGeneric(IWriter encoder)
         {
             Encoder = encoder;
         }
@@ -78,7 +78,7 @@ namespace ZXing
         {
             var encoder = Encoder ?? new MultiFormatWriter();
             var currentOptions = Options;
-            return encoder.encode(contents, Format, currentOptions.Width, currentOptions.Height, currentOptions.Hints);
+            return encoder.Encode(contents, Format, currentOptions.Width, currentOptions.Height, currentOptions.Mode, currentOptions.QuietZone, currentOptions.Hints);
         }
     }
 }
