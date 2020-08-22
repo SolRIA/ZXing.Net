@@ -36,7 +36,7 @@ namespace ZXing.QrCode.Internal
         private static readonly char[] ALPHANUMERIC_CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:".ToCharArray();
         private const int GB2312_SUBSET = 1;
 
-        internal static DecoderResult decode(byte[] bytes,
+        internal static DecoderResult Decode(byte[] bytes,
                                              Version version,
                                              ErrorCorrectionLevel ecLevel,
                                              IDictionary<DecodeHintType, object> hints)
@@ -65,6 +65,7 @@ namespace ZXing.QrCode.Internal
                         try
                         {
                             mode = Mode.ForBits(bits.readBits(4)); // mode is encoded by 4 bits
+                            hints[DecodeHintType.VERSION] = mode;
                         }
                         catch (ArgumentException)
                         {

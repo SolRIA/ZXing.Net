@@ -83,13 +83,15 @@
                     <ComboBox Grid.Column="1" Grid.Row="3" Name="cmbRendererType" Margin="5,0"/>
 
                     <StackPanel Grid.Column="1" Grid.Row="4" Orientation="Horizontal">
-                        <Label Content="Margin" Margin="5,5,0,0" Width="150"/>
-                        <Label Content="Quiet zone" Margin="5,5,0,0" Width="120"/>
+                        <Label Content="Margin" Margin="5,5,0,0" Width="80"/>
+                        <Label Content="Quiet zone" Margin="5,5,0,0" Width="80"/>
+                        <Label Content="Version" Margin="5,5,0,0" Width="80"/>
                     </StackPanel>
 
                     <StackPanel Grid.Column="1" Grid.Row="5" Orientation="Horizontal">
-                        <TextBox Name="txtMargin" Margin="5,0" Width="150"/>
-                        <TextBox Name="txtQuietZone" Margin="5,0" Width="120"/>
+                        <TextBox Name="txtMargin" Margin="5,0" Width="80"/>
+                        <TextBox Name="txtQuietZone" Margin="5,0" Width="80"/>
+                        <TextBox Name="txtVersion" Margin="5,0" Width="80"/>
                     </StackPanel>
 
                     <Label Grid.Column="1" Grid.Row="6" Content="Mode" Margin="5,5,0,0"/>

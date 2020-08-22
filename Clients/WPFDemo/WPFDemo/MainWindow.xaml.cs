@@ -56,6 +56,16 @@ namespace WPFDemo
             set => txtQuietZone.Text = value.ToString();
         }
 
+        public int Version
+        {
+            get
+            {
+                int.TryParse(txtVersion.Text, out int margin);
+                return margin;
+            }
+            set => txtVersion.Text = value.ToString();
+        }
+
         public MainWindow()
         {
             InitializeComponent();
@@ -63,6 +73,7 @@ namespace WPFDemo
             //init properties
             CodeMargin = 2;
             QuietZone = 5;
+            Version = 17;
 
             foreach (var format in MultiFormatWriter.SupportedWriters)
                 cmbEncoderType.Items.Add(format);
@@ -113,7 +124,11 @@ namespace WPFDemo
             labDuration.Content = $"{watch.ElapsedMilliseconds} ms";
             if (result != null)
             {
-                txtBarcodeType.Text = result.BarcodeFormat.ToString();
+                txtBarcodeType.Text = $"Format: {result.BarcodeFormat}";
+                //if (result.ResultMetadata != null && result.ResultMetadata.ContainsKey(ResultMetadataType.))
+                //    txtBarcodeType.Text += $" - Error: {result.ResultMetadata[ResultMetadataType.ERROR_CORRECTION_LEVEL]}";
+                if (result.ResultMetadata != null && result.ResultMetadata.ContainsKey(ResultMetadataType.ERROR_CORRECTION_LEVEL))
+                    txtBarcodeType.Text += $" - Error: {result.ResultMetadata[ResultMetadataType.ERROR_CORRECTION_LEVEL]}";
                 txtBarcodeContent.Text = result.Text;
             }
             else
@@ -136,6 +151,9 @@ namespace WPFDemo
             BarcodeFormat barcodeFormat = (BarcodeFormat)cmbEncoderType.SelectedItem;
             ZXing.QrCode.Internal.Mode mode = (ZXing.QrCode.Internal.Mode)cmbMode.SelectedItem;
             ZXing.QrCode.Internal.ErrorCorrectionLevel errorCorrection = (ZXing.QrCode.Internal.ErrorCorrectionLevel)cmbError.SelectedItem;
+            int? version = null;
+            if (Version >= 1 && Version <= 40)
+                version = Version;
 
             ZXing.Common.EncodingOptions options;
             if (barcodeFormat == BarcodeFormat.QR_CODE)
@@ -147,7 +165,8 @@ namespace WPFDemo
                     Margin = CodeMargin,
                     QuietZone = QuietZone,
                     Mode = mode,
-                    ErrorCorrection = errorCorrection
+                    ErrorCorrection = errorCorrection,
+                    QrVersion = version
                 };
             }
             else

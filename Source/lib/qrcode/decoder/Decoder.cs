@@ -149,7 +149,7 @@ namespace ZXing.QrCode.Internal
             }
 
             // Decode the contents of that stream of bytes
-            return DecodedBitStreamParser.decode(resultBytes, version, ecLevel, hints);
+            return DecodedBitStreamParser.Decode(resultBytes, version, ecLevel, hints);
         }
 
         /// <summary>
