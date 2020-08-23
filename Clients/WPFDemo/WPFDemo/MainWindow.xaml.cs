@@ -171,7 +171,7 @@ namespace WPFDemo
             }
             else
             {
-                options = new ZXing.QrCode.QrCodeEncodingOptions
+                options = new ZXing.Common.EncodingOptions
                 {
                     Height = (int)((FrameworkElement)imageBarcodeEncoder.Parent).ActualHeight,
                     Width = (int)((FrameworkElement)imageBarcodeEncoder.Parent).ActualWidth,
